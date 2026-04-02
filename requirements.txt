@@ -1,1 +1,11 @@
 requests
+beautifulsoup4
+sentence-transformers
+faiss-cpu
+numpy
+google-generativeai
+beautifulsoup4
+sentence-transformers
+faiss-cpu
+numpy
+google-generativeai

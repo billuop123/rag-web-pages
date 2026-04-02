@@ -14,7 +14,6 @@ def chunk_text(text,chunk_size=200,overlap=50):
             break
         chunk={
             "text":" ".join(chunk_words),
-            "url":url,
             "chunk_index":len(chunks)
         }
         chunks.append(chunk)

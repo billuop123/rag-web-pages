@@ -1,4 +1,3 @@
-
 from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
@@ -9,7 +8,6 @@ def build_index(all_chunks):
     takes the list of all chunks and builds a FAISS index
     """
     texts=[chunk['text'] for chunk in all_chunks]
-    print("Embedding the chunks...")
     embeddings=model.encode(texts, show_progress_bar=True)
     dimension=embeddings.shape[1]
     index=faiss.IndexFlatL2(dimension)
@@ -26,7 +24,9 @@ def search(query,index,all_chunks,top_k=3):
     for i,idx in enumerate(indices[0]):
         results.append({
             "text":all_chunks[idx]['text'],
-            "score":distances[0][i]
+            "score":distances[0][i],
+            "url":all_chunks[idx].get('url', 'Unknown'),
+            "title":all_chunks[idx].get('title', 'Unknown')
         })
     return results
 

@@ -11,7 +11,6 @@ def fetch(url):
         response.raise_for_status()
         return response.text
     except Exception as e:   
-        print(e)
         return None    
 
 def parse(html):
