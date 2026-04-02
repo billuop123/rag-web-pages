@@ -1,12 +1,10 @@
 from fetcher import fetch
 from fetcher import parse
-webContent=fetch("https://www.google.com")
+webContent=fetch("https://en.wikipedia.org/wiki/Python_(programming_language)")
 if(not webContent):
     print("Unable to find the content")
-if (webContent): 
-    head,title,body=parse(webContent)
-    print("Head:",head)
+else:
+    title,text=parse(webContent)
     print("Title:",title)
-    print("Body:",body)
-    if (not head and not title and  not body):
-        print("Unable to parse the content")
+    print("Text:",text)
+    
