@@ -3,40 +3,54 @@ from chunker import chunk_text
 from embedder import build_index, search
 from generator import generate_answer
 
-def main():
-    urls = [
-        "https://en.wikipedia.org/wiki/Python_(programming_language)",
-        "https://en.wikipedia.org/wiki/Artificial_intelligence"
-    ]
+
+def get_valid_urls():
+    user_input = input("Enter URLs separated by space: ")
+    urls = [u.strip() for u in user_input.split() if u.strip().startswith(('http://', 'https://'))]
     
+    if not urls:
+        print("No valid URLs provided. URLs must start with http:// or https://")
+    return urls
+
+
+def process_url(url):
+    print(f"\nFetching: {url}")
+    content = fetch(url)
+    
+    if not content:
+        print(f"Unable to fetch {url}")
+        return []
+    
+    title, text = parse(content)
+    if not text:
+        print(f"Unable to parse {url}")
+        return []
+    
+    chunks = chunk_text(text)
+    for chunk in chunks:
+        chunk['url'] = url
+        chunk['title'] = title
+    
+    print(f"Created {len(chunks)} chunks from {title}")
+    return chunks
+
+
+def build_knowledge_base(urls):
     print("Building knowledge base...")
     all_chunks = []
     
     for url in urls:
-        print(f"\nFetching: {url}")
-        webContent = fetch(url)
-        
-        if not webContent:
-            print(f"Unable to fetch {url}")
-            continue
-        
-        title, text = parse(webContent)
-        if not text:
-            print(f"Unable to parse {url}")
-            continue
-        
-        chunks = chunk_text(text)
-        # Add source URL to each chunk
-        for chunk in chunks:
-            chunk['url'] = url
-            chunk['title'] = title
-        
-        all_chunks.extend(chunks)
-        print(f"Created {len(chunks)} chunks from {title}")
+        all_chunks.extend(process_url(url))
+    
+    if not all_chunks:
+        print("\nNo content extracted from any URLs. Exiting.")
+        return None, None
     
     print(f"\nTotal chunks: {len(all_chunks)}")
-    index, all_chunks = build_index(all_chunks)
-    
+    return build_index(all_chunks)
+
+
+def run_qa_loop(index, chunks):
     print("\n" + "="*80)
     print("RAG SYSTEM READY - Ask questions (type 'quit' to exit)")
     print("="*80)
@@ -47,12 +61,22 @@ def main():
         if query.lower() in ['quit', 'exit', 'q']:
             break
         
-        if not query:
-            continue
-        
-        results = search(query, index, all_chunks)
-        generate_answer(query, results)
+        if query:
+            results = search(query, index, chunks)
+            generate_answer(query, results)
+
+
+def main():
+    urls = get_valid_urls()
+    if not urls:
+        return
+    
+    index, chunks = build_knowledge_base(urls)
+    if index is None:
+        return
+    
+    run_qa_loop(index, chunks)
+
 
 if __name__ == "__main__":
     main()
-    
